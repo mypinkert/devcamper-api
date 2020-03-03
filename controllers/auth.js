@@ -7,7 +7,7 @@ const asyncHandler = require('../middleware/async');
 // @desc Register user
 // @route POST /api/v1/auth/register
 // @access Public
-exports.register = asyncHandler(async (req,res, next) => {
+exports.register = asyncHandler(async (req, res, next) => {
    const { name, email, password, role } = req.body;
 
    // Create user
@@ -24,7 +24,7 @@ exports.register = asyncHandler(async (req,res, next) => {
 // @desc Login user
 // @route POST /api/v1/auth/login
 // @access Public
-exports.login = asyncHandler(async (req,res, next) => {
+exports.login = asyncHandler(async (req, res, next) => {
     const { email, password } = req.body;
  
     // Validate email & password
@@ -47,6 +47,21 @@ exports.login = asyncHandler(async (req,res, next) => {
     }
     
     sendTokenResponse(user, 200, res);
+ });
+
+ // @desc Log user out/ clear coockie
+// @route POST /api/v1/auth/logout
+// @access Public
+exports.logout = asyncHandler(async (req, res, next) => {
+    res.cookie('token','none', {
+        expires: new Date(Date.now() + 10 * 1000),
+        httpOnly:true
+    })
+
+    res.status(200).json({
+        success: true,
+        data: {}
+    });
  });
 
 // @desc Get current logged-in user
@@ -114,7 +129,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     // Create reset url
-    const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/resetpassword/${resetToken}`;
+    const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/resetpassword/${resetToken}`;
 
     const message = `You receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
 
